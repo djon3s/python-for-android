@@ -1,0 +1,15 @@
+--- python/dnet.pyx	2007-01-20 22:39:21.000000000 +1100
++++ python/dnet.pyx	2013-02-23 09:59:55.810390433 +1100
+@@ -45,8 +45,11 @@
+         raise ValueError, "not a %d-byte binary string: %r" % (n, src)
+     memcpy(dst, src, n)
+ 
+-cdef __oserror():
++cdef extern from "errno.h":
+     cdef extern int errno
++    cdef extern char *strerror(int)
++
++cdef __oserror():
+     return strerror(errno)
+ 
+ def __iter_append(entry, l):
