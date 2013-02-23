@@ -19,6 +19,7 @@ function build_pyyaml() {
 	export CC="$CC -I$BUILD_libyaml/include"
 	export LDFLAGS="$LDFLAGS -L$LIBS_PATH -L$BUILD_libyaml/src/.libs -static"
 
+	# broken: this seems to just nuke the path
 	sed -i -e "s|#include_dirs=/usr/local/include:../../include|include_dirs=${BUILD_libyaml}/include|" setup.cfg
 	sed -i -e "s|#library_dirs=/usr/local/lib:../../lib|library_dirs=${BUILD_libyaml}/src/.libs|" setup.cfg
 
