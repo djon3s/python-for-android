@@ -1,3 +1,6 @@
+#XXX: wouldn't it be better to use a build-only cython module and not bundle it into the apk?
+#		this script and kivy's setup.py are pretty hackish
+
 import os, sys
 
 class cythonizer():
@@ -24,10 +27,12 @@ class cythonizer():
         self.a_libs  = "-L%s/platforms/android-%s/arch-arm/usr/lib"                                                  %(self.android_ndk, self.android_api)
         
     def make_o(self, c_file, o_file):
-        command = """%s -mandroid -fomit-frame-pointer -DNDEBUG -g -O3 -Wall -Wstrict-prototypes -fPIC --sysroot %s  %s %s -c database.c -o database.o""" %(self.gcc, 
+        command = """%s -mandroid -fomit-frame-pointer -DNDEBUG -g -O3 -Wall -Wstrict-prototypes -fPIC --sysroot %s  %s %s -c %s -o %s""" %(self.gcc, 
                            self.sysroot, 
                            self.a_incl, 
-                           self.p_incl)
+                           self.p_incl,
+                           self.c_file,
+                           self.o_file)
         print command
     
     def make_so(self, o_file, so_file= None):
@@ -41,8 +46,9 @@ class cythonizer():
                                                                                                                                  o_file,
                                                                                                                                  so_file)
         print command
+
     def make(self, py_pyx):
-        for root, dirs, files in os.walk(directory):
+        for root, dirs, files in os.walk('.'):
             for file in files:
                 if file.endswith('.py') or file.endswith('.pyx'):
                     print file
