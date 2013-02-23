@@ -17,11 +17,14 @@ function build_pyyaml() {
 	push_arm
 
 	export CC="$CC -I$BUILD_libyaml/include"
-	export LDFLAGS="$LDFLAGS -L$LIBS_PATH -L$BUILD_libyaml/src/.libs"
+	export LDFLAGS="$LDFLAGS -L$LIBS_PATH -L$BUILD_libyaml/src/.libs -static"
+
+	sed -i -e "s|#include_dirs=/usr/local/include:../../include|include_dirs=${BUILD_libyaml}/include|" setup.cfg
+	sed -i -e "s|#library_dirs=/usr/local/lib:../../lib|library_dirs=${BUILD_libyaml}/src/.libs|" setup.cfg
 
 	try find . -iname '*.pyx' -exec cython {} \;
 	try $BUILD_PATH/python-install/bin/python.host setup.py build_ext -v
-	try find build/lib.* -name "*.o" -exec $STRIP {} \;
+#	try find build/lib.* -name "*.o" -exec $STRIP {} \;
 	try $BUILD_PATH/python-install/bin/python.host setup.py --with-libyaml install -O2
 
 	pop_arm
