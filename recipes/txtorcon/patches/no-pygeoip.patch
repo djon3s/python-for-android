@@ -1,0 +1,49 @@
+*** util.py	2012-11-22 06:36:56.000000000 +1100
+--- ../util.py	2013-02-27 00:06:21.453769507 +1100
+***************
+*** 10,53 ****
+  import socket
+  import subprocess
+  
+- try:
+-     import GeoIP
+- 
+-     def create_geoip(fname):
+-         try:
+-             ## It's more "pythonic" to just wait for the exception,
+-             ## but GeoIP prints out "Can't open..." messages for you,
+-             ## which isn't desired here
+-             if not os.path.isfile(fname):
+-                 raise IOError("Can't find %s" % fname)
+-             return GeoIP.open(fname, GeoIP.GEOIP_STANDARD)
+- 
+-         except GeoIP.error:
+-             raise IOError("Can't load %s" % fname)
+- 
+- except ImportError:
+-     import pygeoip
+-     create_geoip = pygeoip.GeoIP
+  
+  city = None
+  country = None
+  asn = None
+  
+- try:
+-     city = create_geoip("/usr/share/GeoIP/GeoLiteCity.dat")
+- except IOError:
+-     city = None
+- 
+- try:
+-     asn = create_geoip("/usr/share/GeoIP/GeoIPASNum.dat")
+- except IOError:
+-     asn = None
+- 
+- try:
+-     country = create_geoip("/usr/share/GeoIP/IP.dat")
+- except IOError:
+-     country = None
+- 
+  
+  def find_keywords(args):
+      """
+--- 10,20 ----
