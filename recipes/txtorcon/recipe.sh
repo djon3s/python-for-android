@@ -4,7 +4,7 @@
 VERSION_txtorcon=
 
 # dependencies of this recipe
-DEPS_txtorcon=(tor setuptools twisted)
+DEPS_txtorcon=(tor setuptools sdl twisted)
 
 # url of the
 #URL_txtorcon=https://github.com/meejah/txtorcon/archive/3b370a0cc77ee7c52fcd956611c5aed244c19a96.zip
@@ -53,7 +53,7 @@ function build_txtorcon() {
 
 	export PYTHONPATH=$BUILD_hostpython/Lib/site-packages
 
-	# fake try to be able to cythonize generated files
+	# fake try to be able to cythonize generated files (copied from twisted recipe)
 	$BUILD_PATH/python-install/bin/python.host setup.py build
 	try find . -iname '*.pyx' -exec cython {} \;
 	try $BUILD_PATH/python-install/bin/python.host setup.py build
