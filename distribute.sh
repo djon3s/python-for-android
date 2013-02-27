@@ -7,10 +7,10 @@
 #------------------------------------------------------------------------------
 
 # Modules
-MODULES=$MODULES
+export MODULES=$MODULES
 
 # Resolve Python path
-PYTHON="$(which python2.7)"
+export PYTHON="$(which python2.7)"
 if [ "X$PYTHON" == "X" ]; then
 	PYTHON="$(which python2)"
 fi
@@ -20,7 +20,7 @@ fi
 
 # Paths
 ROOT_PATH="$(dirname $($PYTHON -c 'from __future__ import print_function; import os,sys;print(os.path.realpath(sys.argv[1]))' $0))"
-RECIPES_PATH="$ROOT_PATH/recipes"
+export RECIPES_PATH="$ROOT_PATH/recipes"
 BUILD_PATH="$ROOT_PATH/build"
 LIBS_PATH="$ROOT_PATH/build/libs"
 JAVACLASS_PATH="$ROOT_PATH/build/java"
@@ -33,6 +33,7 @@ DIST_PATH="$ROOT_PATH/dist/default"
 export LIBLINK_PATH="$BUILD_PATH/objects"
 export LIBLINK="$ROOT_PATH/src/tools/liblink"
 export BIGLINK="$ROOT_PATH/src/tools/biglink"
+export DEPGEN="$ROOT_PATH/src/tools/depgen.py"
 
 MD5SUM=$(which md5sum)
 if [ "X$MD5SUM" == "X" ]; then
@@ -356,72 +357,90 @@ function in_array() {
 }
 
 function run_source_modules() {
-	needed=($MODULES)
-	declare -a processed
-	order=()
+	debug "Using ${DEPGEN} to calculate dependencies"
+	debug "Current modules list: ${MODULES}"
 
-	while [ ${#needed[*]} -ne 0 ]; do
+    MODULES=$(${PYTHON} ${DEPGEN} ${MODULES})
 
-		# pop module from the needed list
-		module=${needed[0]}
-		unset needed[0]
-		needed=( ${needed[@]} )
+	info "depgen.py dependency resolution calculated this module build order:"
+	info ${MODULES}
 
-		# check if the module have already been declared
-		in_array $module "${processed[@]}"
-		if [ $? -ne 255 ]; then
-			debug "Ignored $module, already processed"
-			continue;
-		fi
+	# source recipes
+    for module in $MODULES; do
+        recipe=$RECIPES_PATH/$module/recipe.sh
+        debug "Read $module recipe"
+        if [ ! -f $recipe ]; then
+            error "Recipe $module does not exist"
+            exit -1
+        fi
+        source $RECIPES_PATH/$module/recipe.sh
+    done
 
-		# add this module as done
-		processed=( ${processed[@]} $module )
+	#declare -a processed
+	#order=()
 
-		# append our module at the end only if we are not exist yet
-		in_array $module "${order[@]}"
-		if [ $? -eq 255 ]; then
-			order=( ${order[@]} $module )
-		fi
+	#while [ ${#needed[*]} -ne 0 ]; do
 
-		# read recipe
-		debug "Read $module recipe"
-		recipe=$RECIPES_PATH/$module/recipe.sh
-		if [ ! -f $recipe ]; then
-			error "Recipe $module does not exit"
-			exit -1
-		fi
-		source $RECIPES_PATH/$module/recipe.sh
+	#	# pop module from the needed list
+	#	module=${needed[0]}
+	#	unset needed[0]
+	#	needed=( ${needed[@]} )
 
-		# append current module deps to the needed
-		deps=$(echo \$"{DEPS_$module[@]}")
-		eval deps=($deps)
-		if [ ${#deps[*]} -gt 0 ]; then
-			debug "Module $module depend on" ${deps[@]}
-			needed=( ${needed[@]} ${deps[@]} )
+	#	# check if the module have already been declared
+	#	in_array $module "${processed[@]}"
+	#	if [ $? -ne 255 ]; then
+	#		debug "Ignored $module, already processed"
+	#		continue;
+	#	fi
 
-			# for every deps, check if it's already added to order
-			# if not, add the deps before ourself
-			debug "Dependency order is ${order[@]} (current)"
-			for dep in "${deps[@]}"; do
-				#debug "Check if $dep is in order"
-				in_array $dep "${order[@]}"
-				if [ $? -eq 255 ]; then
-					debug "missing $dep in order"
-					# deps not found in order
-					# add it before ourself
-					in_array $module "${order[@]}"
-					index=$?
-					debug "our $module index is $index"
-					order=(${order[@]:0:$index} $dep ${order[@]:$index})
-					debug "new order is ${order[@]}"
-				fi
-			done
-			debug "Dependency order is ${order[@]} (computed)"
-		fi
-	done
+	#	# add this module as done
+	#	processed=( ${processed[@]} $module )
 
-	MODULES="${order[@]}"
-	info="Modules changed to $MODULES"
+	#	# append our module at the end only if we are not exist yet
+	#	in_array $module "${order[@]}"
+	#	if [ $? -eq 255 ]; then
+	#		order=( ${order[@]} $module )
+	#	fi
+
+	#	# read recipe
+	#	debug "Read $module recipe"
+	#	recipe=$RECIPES_PATH/$module/recipe.sh
+	#	if [ ! -f $recipe ]; then
+	#		error "Recipe $module does not exit"
+	#		exit -1
+	#	fi
+	#	source $RECIPES_PATH/$module/recipe.sh
+
+	#	# append current module deps to the needed
+	#	deps=$(echo \$"{DEPS_$module[@]}")
+	#	eval deps=($deps)
+	#	if [ ${#deps[*]} -gt 0 ]; then
+	#		debug "Module $module depend on" ${deps[@]}
+	#		needed=( ${needed[@]} ${deps[@]} )
+
+	#		# for every deps, check if it's already added to order
+	#		# if not, add the deps before ourself
+	#		debug "Dependency order is ${order[@]} (current)"
+	#		for dep in "${deps[@]}"; do
+	#			#debug "Check if $dep is in order"
+	#			in_array $dep "${order[@]}"
+	#			if [ $? -eq 255 ]; then
+	#				debug "missing $dep in order"
+	#				# deps not found in order
+	#				# add it before ourself
+	#				in_array $module "${order[@]}"
+	#				index=$?
+	#				debug "our $module index is $index"
+	#				order=(${order[@]:0:$index} $dep ${order[@]:$index})
+	#				debug "new order is ${order[@]}"
+	#			fi
+	#		done
+	#		debug "Dependency order is ${order[@]} (computed)"
+	#	fi
+	#done
+
+	#MODULES="${order[@]}"
+	#info="Modules changed to $MODULES"
 }
 
 function run_get_packages() {

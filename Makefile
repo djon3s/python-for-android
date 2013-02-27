@@ -5,8 +5,11 @@ LOGFILE = log/${DISTNAME}.log
 
 dist: 
 	mkdir -p log ${PROJDIR}
-	# distribute.sh sometimes cp's and rm's nonexistent things, but it's usually ok
-	-./distribute.sh -m '${MODULES} python' -d ${DISTNAME} | tee ${LOGFILE}
+	# XXX distribute.sh sometimes tries to cp and rm nonexistent files, hence 
+	#     the "-". this is ok unless the build ends lacking libpymodules.so,
+	#     then no distdir is made (it should throw an error at the beginning)
+	-./distribute.sh -m '${MODULES}' -d ${DISTNAME} -x
+	#-./distribute.sh -m '${MODULES}' -d ${DISTNAME} -x | tee ${LOGFILE}
 	
 build : dist
 	cd ${DISTNAME}/default
