@@ -47,25 +47,14 @@ function build_txtorcon() {
     push_arm
 #	try $BUILD_PATH/python-install/bin/python.host setup.py install -O2
 
-# NEW
-	export LDFLAGS="$LDFLAGS -L$LIBS_PATH"
-	export LDSHARED="$LIBLINK"
+#	export PYTHONPATH=$BUILD_PATH/hostpython/Python-2.7.2/Lib/site-packages
 
-	export PYTHONPATH=$BUILD_hostpython/Lib/site-packages
+#    try $BUILD_hostpython/hostpython setup.py install -O2 --root=$BUILD_PATH/python-install --install-lib=lib/python2.7/site-packages
 
-	# fake try to be able to cythonize generated files (copied from twisted recipe)
-	$BUILD_PATH/python-install/bin/python.host setup.py build
-	try find . -iname '*.pyx' -exec cython {} \;
-	try $BUILD_PATH/python-install/bin/python.host setup.py build
-	#try find build/lib.* -name "*.o" -exec $STRIP {} \;
+    cp -rv txtorcon $BUILD_PATH/python-install/lib/python2.7/site-packages
 
-        try $BUILD_hostpython/hostpython setup.py install -O2 --root=$BUILD_PATH/python-install --install-lib=lib/python2.7/site-packages
-
-	try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/txtorcon/test
-	try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/share/txtorcon/examples
-
-	unset LDSHARED
-
+	#try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/txtorcon/test
+	#try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/share/txtorcon/examples
 
     pop_arm
 }
