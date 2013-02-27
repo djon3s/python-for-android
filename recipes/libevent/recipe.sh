@@ -34,7 +34,7 @@ function build_libevent() {
 	
 	push_arm
 	
-	try ./configure --host=arm-linux-eabi --build=x86_64
+	try ./configure --host=arm-linux-eabi
 	try make verify
 	
 	pop_arm

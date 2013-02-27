@@ -4,7 +4,7 @@
 VERSION_txtorcon=
 
 # dependencies of this recipe
-DEPS_txtorcon=(tor setuptools sdl twisted)
+DEPS_txtorcon=(tor twisted)
 
 # url of the
 #URL_txtorcon=https://github.com/meejah/txtorcon/archive/3b370a0cc77ee7c52fcd956611c5aed244c19a96.zip
@@ -44,19 +44,20 @@ function prebuild_txtorcon() {
 function build_txtorcon() {
     cd $BUILD_txtorcon
 
-    push_arm
+#    push_arm
 #	try $BUILD_PATH/python-install/bin/python.host setup.py install -O2
 
 #	export PYTHONPATH=$BUILD_PATH/hostpython/Python-2.7.2/Lib/site-packages
 
 #    try $BUILD_hostpython/hostpython setup.py install -O2 --root=$BUILD_PATH/python-install --install-lib=lib/python2.7/site-packages
 
+    rm -rvf txtorcon/test
     cp -rv txtorcon $BUILD_PATH/python-install/lib/python2.7/site-packages
 
 	#try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/txtorcon/test
 	#try rm -rf $BUILD_PATH/python-install/lib/python*/dist-packages/txtorcon*/share/txtorcon/examples
 
-    pop_arm
+#    pop_arm
 }
 
 # function called after all the compile have been done
