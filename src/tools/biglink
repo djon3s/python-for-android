@@ -39,6 +39,9 @@ while args:
     if a not in unique_args:
         unique_args.insert(0, a)
 
+if not unique_args:
+    print('Biglink: no objects found to link into %s, doing nothing' % sys.argv[1])
+    sys.exit()
 
 print('Biglink create %s library' % sys.argv[1])
 print('Biglink arguments:')
