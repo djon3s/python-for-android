@@ -67,10 +67,10 @@ esac
 
 
 # Internals
-CRED="\x1b[31;01m"
-CBLUE="\x1b[34;01m"
-CGRAY="\x1b[30;01m"
-CRESET="\x1b[39;49;00m"
+CRED="[distribute.sh] [ERROR] "
+CBLUE="[distribute.sh] [INFO] "
+CGRAY="[distribute.sh] [DEBUG] "
+CRESET=""
 DO_CLEAN_BUILD=0
 DO_SET_X=0
 
@@ -406,14 +406,14 @@ function run_source_modules() {
 				#debug "Check if $dep is in order"
 				in_array $dep "${order[@]}"
 				if [ $? -eq 255 ]; then
-					#debug "missing $dep in order"
+					debug "missing $dep in order"
 					# deps not found in order
 					# add it before ourself
 					in_array $module "${order[@]}"
 					index=$?
-					#debug "our $module index is $index"
+					debug "our $module index is $index"
 					order=(${order[@]:0:$index} $dep ${order[@]:$index})
-					#debug "new order is ${order[@]}"
+					debug "new order is ${order[@]}"
 				fi
 			done
 			debug "Dependency order is ${order[@]} (computed)"
